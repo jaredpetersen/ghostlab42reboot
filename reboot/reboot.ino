@@ -42,20 +42,17 @@ const byte IS31FL3730_PWM_Register = 0x19; // "PWM Register" index in the IS31FL
 
 const byte IS31FL3730_Reset_Register = 0xFF; // "Reset Register" index in the IS31FL3730
 // Once user writes any 8-bit data to the Reset Register, IS31FL3730 will reset all registers to default value.
-// On  initial power-up, the IS31FL3730 registers are reset to their default values for a blank display. 
+// On  initial power-up, the IS31FL3730 registers are reset to their default values for a blank display.
 
 /*
  * Android Setup Function
  */
 void setup() {
   Wire.begin();
-  // Is the baud rate call even needed?
-  // Serial.begin(9600);  
-
-  // The drive current defaults to 40mA per segment - that is too much!  Only allow up to 20mA
-  // Start with max allowed current setting to the display (1/2 of the default current setting)
-  IS31FL3730_display_power_max(4); 
-  IS31FL3730_display_power_max(6);
+  
+  // Set the maximum display power for both displays
+  setDisplayPowerMax(4);
+  setDisplayPowerMax(6);
 }
 
 /*
@@ -64,9 +61,9 @@ void setup() {
  * Parameters:
  * Digits Selects the display to dim, 4 = 4 digit display and all others = 6 digit display
  */
-void IS31FL3730_display_reset(int Digits) 
+void resetDisplay(int Digits) 
 {
-  // Set up the transmission depending on the display being reset
+  // Set up the wire transmission depending on the display being reset
   if (Digits == 4)
   { 
     Wire.beginTransmission(IS31FL3730_DIGIT_4_I2C_ADDRESS); 
@@ -77,12 +74,13 @@ void IS31FL3730_display_reset(int Digits)
   }
 
   // Reset the lighting effects (dim, bright, etc.)
+  // Send any value to reset the lighting (value ignored)
   Wire.write(IS31FL3730_Reset_Register);
-  Wire.write(0x00); // Send any value to reset the lighting (value ignored)
+  Wire.write(0x00);
   Wire.endTransmission();
 
   // Reset the current
-  IS31FL3730_display_power_max(Digits);
+  setDisplayPowerMax(Digits);
 }
 
 /*
@@ -91,7 +89,7 @@ void IS31FL3730_display_reset(int Digits)
  * Parameters:
  * Digits Selects the display to dim, 4 = 4 digit display and all others = 6 digit display
  */
-void IS31FL3730_display_power_min(int Digits) 
+void setDisplayPowerMin(int Digits) 
 {
   // Set up the transmission depending on the display being reset
   if (Digits == 4)
@@ -114,7 +112,7 @@ void IS31FL3730_display_power_min(int Digits)
  * Parameters:
  * Digits Selects the display to dim, 4 = 4 digit display and all others = 6 digit display
  */
-void IS31FL3730_display_power_max(int Digits) {
+void setDisplayPowerMax(int Digits) {
   /* The display driver does allow currents greater than the displays should take - do not allow tanything over 20mA!
    * The display driver resets to 40mA per segment which is too much.  Somehow we need to make sure that is never
    * violated but the part is write-only, so we need to keep track of the setting somewhere or just always force to the max current.
@@ -142,7 +140,7 @@ void IS31FL3730_display_power_max(int Digits) {
  * Digits Selects the display to dim, 4 = 4 digit display and all others = 6 digit display
  * PWM    Sets the dimming level, not very linear. 0x80 = full intensity, 0x00 is off
  */
-void IS31FL3730_Display_Dimming (int Digits, byte PWM) {
+void setDisplayBrightness (int Digits, byte PWM) {
   // Probably should rewrite to allow a user setting in percentage, so an integer and 0 to 100 map to 0 to 128.  
   // Anything above 100 would be clamped to the max useful register value of 128 (0x80).
 
@@ -182,7 +180,7 @@ void display_update_4a() {
   // Write the display data in the temporary registers
   Wire.beginTransmission(IS31FL3730_DIGIT_4_I2C_ADDRESS);
   Wire.write(IS31FL3730_Data_Registers); // Matrix 1 Data registers
-  Wire.write(0x06); // Digit 1 value (far left) -- Display "1"
+  Wire.write(0x3F); // Digit 1 value (far left) -- Display "0"
   Wire.write(0x5B); // Digit 2 value -- Display "2"
   Wire.write(0x4F); // Digit 3 Value -- Display "3"
   Wire.write(0x66); // Digit 4 value (far right) -- Display "4"
@@ -228,8 +226,8 @@ void display_update_6a() {
   Wire.write(0x6D); // Digit 5 value
   Wire.write(0x7D); // Digit 6 value (far right)
   Wire.endTransmission();
+  
   // Now transfer the data from the temporary registers to the display registers
-  delay(1); // is this needed?
   Wire.beginTransmission(IS31FL3730_DIGIT_6_I2C_ADDRESS);
   Wire.write(IS31FL3730_Update_Column_Register); // Update Column Register
   Wire.write(0x00); // Any value should work (value ignored)
@@ -249,8 +247,8 @@ void display_update_6b() {
   Wire.write(0x10); // Digit 5 value
   Wire.write(0x20); // Digit 6 value (far right)
   Wire.endTransmission();
+  
   // Now transfer the data from the temporary registers to the display registers
-  delay(1); // is this needed?
   Wire.beginTransmission(IS31FL3730_DIGIT_6_I2C_ADDRESS);
   Wire.write(IS31FL3730_Update_Column_Register); // Update Column Register
   Wire.write(0x00); // Any value should work (value ignored)
@@ -261,20 +259,32 @@ void display_update_6b() {
  * Arduino Overall Looping Function
  */
 void loop() {
+  // Print "0234" and hold
   display_update_4a();
-  IS31FL3730_Display_Dimming(6,0x80);
+  
+  // Wait and print "12345678"
   delay(500);
-  /*display_update_6a();
-  IS31FL3730_Display_Dimming(4,0x10);
+  setDisplayBrightness(6,0x80);
+  display_update_6a();
+  
   delay(500);
+  
+  setDisplayBrightness(4,0x10);
   display_update_4b();
-  IS31FL3730_Display_Dimming(6,0x02);
+  
   delay(500);
+
+  setDisplayBrightness(6,0x02);
   display_update_6b();
-  IS31FL3730_Display_Dimming(4,0x80);
-  delay(500);*/
-  IS31FL3730_display_reset(4); // reset the 4 digit display
+  
   delay(500);
-  IS31FL3730_display_reset(6); // reset the 6 digit display
+
+  setDisplayBrightness(4,0x80);
+  resetDisplay(4); // reset the 4 digit display
+  
+  delay(500);
+  
+  resetDisplay(6); // reset the 6 digit display
+  
   delay(500);
 }
