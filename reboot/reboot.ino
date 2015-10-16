@@ -1,51 +1,50 @@
 /*
- * Arduino library that serves as the driver for GhostLab42's Reboot dual-display board set
+ * Arduino library that serves as the driver for GhostLab42's Reboot
+ * dual-display board set
+ *
+ * See README.md and LICENSE for more information
  */
 
 #include "Wire.h"
+
 // Each I2C has a unique bus address
 #define IS31FL3730_DIGIT_4_I2C_ADDRESS 0x63 // 4 digit IS31FL3730 display
 #define IS31FL3730_DIGIT_6_I2C_ADDRESS 0x60 // 6 digit IS31FL3730 display
 
-const byte IS31FL3730_Data_Registers = 0x01; // "Matrix 1 Data Register" index in the IS31FL3730
+// "Matrix 1 Data Register" index in the IS31FL3730
 // 8 bit value to define which segments are lit. 0 == off, 1 == on
-// This is the starting index.  Sequential bytes will go to the next register index.
-// Works great for data, but stop after the matrix data is updated and then end the command.
+// This is the starting index.  Sequential bytes will go to the next
+// register index.
+// Works great for data, but stop after the matrix data is updated and then
+// end the command.
+const byte IS31FL3730_Data_Registers = 0x01;
 
-const byte IS31FL3730_Update_Column_Register = 0x0C; // "Update Column Register" index in the IS31FL3730
-// The data sent to the Data Registers will be stored in temporary registers.
-// A write operation of any 8-bit value to the Update Column Register is required to update
-// the Data Registers (01h~0Bh, 0Eh~18h)
+// "Update Column Register" index in the IS31FL3730
+// The data sent to the Data Registers will be stored in temporary registers
+// A write operation of any 8-bit value to the Update Column Register is
+// required to update the Data Registers (01h~0Bh, 0Eh~18h)
+const byte IS31FL3730_Update_Column_Register = 0x0C;
 
-const byte IS31FL3730_Lighting_Effect_Register = 0x0D; // "Lighting Effect Register" index in the IS31FL3730
-// Bottom four bits control the Full Current Setting for Each Row Output
-//   0000: 40mA
-//   0001: 45mA
-//   0010: 50mA
-//   0011: 55mA
-//   0100: 60mA
-//   0101: 65mA
-//   0110: 70mA
-//   0111: 75mA
-//   1000: 5mA
-//   1001: 10mA
-//   1010: 15mA
-//   1011: 20mA
-//   1100: 25mA
-//   1100: 30mA
-//   1110: 35mA
-//   1111: ???? - not documented!
+// "Lighting Effect Register" index in the IS31FL3730
+const byte IS31FL3730_Lighting_Effect_Register = 0x0D;
 
-const byte IS31FL3730_PWM_Register = 0x19; // "PWM Register" index in the IS31FL3730
-// The PWM Register can modulate LED light with 128 different items.
-// When the D7 set to “1”, the PWM is the 128 item.
-// When the D7 set to “0”, D6:D0 set the PWM from the 0 item to the 127 item.
+// "PWM Register" index in the IS31FL3730
+// The PWM Register can modulate LED light with 128 different items --
+// When the D7 set to “1”, the PWM is the 128 item
+// When the D7 set to “0”, D6:D0 set the PWM from the 0 item to the 127 item
+const byte IS31FL3730_PWM_Register = 0x19;
 
-const byte IS31FL3730_Reset_Register = 0xFF; // "Reset Register" index in the IS31FL3730
+// "Reset Register" index in the IS31FL3730
 // Once user writes any 8-bit data to the Reset Register, IS31FL3730 will reset
-// all registers to default value.
+// all registers to default value
 // On  initial power-up, the IS31FL3730 registers are reset to their default
 // values for a blank display.
+const byte IS31FL3730_Reset_Register = 0xFF;
+
+
+/******************************************************************************
+ *                             Arduino Functions                              *
+ ******************************************************************************/
 
 /*
  * Android Setup Function
@@ -56,6 +55,69 @@ void setup() {
   // Set the maximum display power for both displays
   setDisplayPowerMax(4);
   setDisplayPowerMax(6);
+}
+
+/*
+ * Arduino Overall Looping Function
+ */
+void loop() {
+  setDisplayBrightness(6, 0x02);
+
+  print(4, "1245");
+  delay(200);
+  print(4, "8251");
+  print(6, "5646431");
+
+  delay(500);
+  print(6, "1709752");
+  delay(500);
+}
+
+/******************************************************************************
+ *                             Display Functions                              *
+ ******************************************************************************/
+
+/*
+ * Prints the characters to the selected display. The only characters allowed
+ * are numbers 0-9 and letters A, b, C, d, E, and F
+ */
+void print(int digits, char value[])
+{
+  // User can technically give us any digit, so we have to do a nice
+  // conversion with that data so that we can use it for proper iteration
+  if (digits != 4)
+  {
+    digits = 6;
+  }
+
+  // Write the display data in the temporary registers
+  setupWireTransmission(digits);
+  Wire.write(IS31FL3730_Data_Registers);
+
+  // Iterate over the print value and print out the individual characters
+  // Any string that goes over the number of digits gets cut off
+  // Any string that goes under the number of digits has blank spaces in
+  // in the remaining spots
+  for (int i = 0; i < digits; i++)
+  {
+    Wire.write(charToDisplayByte(value[i]));
+  }
+
+  // End the temporary register transmission
+  Wire.endTransmission();
+
+  // Transfer the display data from the temporary registers to the display
+  setupWireTransmission(digits);
+
+  // Write to the Update Column Register to let the board know we want to
+  // update the display
+  Wire.write(IS31FL3730_Update_Column_Register);
+
+  // Send any value to initate the display (value ignored)
+  Wire.write(0x00);
+
+  // End the Updte Column Register Transmission
+  Wire.endTransmission();
 }
 
 /*
@@ -112,66 +174,9 @@ void setDisplayBrightness (int digits, byte PWM) {
   Wire.endTransmission();
 }
 
-/*
- * Prints the characters to the selected display. The only characters allowed
- * are numbers 0-9 and letters A, b, C, d, E, and F
- */
-void print(int digits, char value[])
-{ 
-  // User can technically give us any digit, so we have to do a nice
-  // conversion with that data so that we can use it for proper iteration
-  if (digits != 4)
-  {
-    digits = 6;
-  }
-
-  // Write the display data in the temporary registers
-  setupWireTransmission(digits);
-  Wire.write(IS31FL3730_Data_Registers);
-  
-  // Iterate over the print value and print out the individual characters
-  // Any string that goes over the number of digits gets cut off
-  // Any string that goes under the number of digits has blank spaces in
-  // in the remaining spots
-  for (int i = 0; i < digits; i++)
-  {
-    Wire.write(charToDisplayByte(value[i]));
-  }
-
-  // End the temporary register transmission
-  Wire.endTransmission();
-
-  // Transfer the display data from the temporary registers to the display
-  setupWireTransmission(digits);
-  
-  // Write to the Update Column Register to let the board know we want to
-  // update the display
-  Wire.write(IS31FL3730_Update_Column_Register); 
-  
-  // Send any value to initate the display (value ignored)
-  Wire.write(0x00);
-
-  // End the Updte Column Register Transmission
-  Wire.endTransmission();
-}
-
-/*
- * Arduino Overall Looping Function
- */
-void loop() {
-  print(4, "01");
-  delay(500);
-  print(6, "HE110");
-  delay(500);
-  resetDisplay(4);
-  delay(500);
-  resetDisplay(6);
-  delay(500);
-}
-
 
 /******************************************************************************
- *                           Arduino Helper Methods                           *
+ *                              Helper Functions                              *
  ******************************************************************************/
 
 /*
@@ -234,10 +239,12 @@ void setupWireTransmission(int digits)
  */
 byte charToDisplayByte(char displayCharacter)
 {
-  // Although this isn't very time efficient (linear time), it at least saves 
-  // us precious space that a HashMap/Dictionary (constant time) would have 
-  // gobbled up
-  if (displayCharacter == '0') return 0x3F;
+  // Although this isn't very time efficient (linear time) it's apparently a
+  // very bad idea to use hashmaps on Arduino because they're resource
+  // intensive :-(
+
+  // Numbers
+  if      (displayCharacter == '0') return 0x3F;
   else if (displayCharacter == '1') return 0x06;
   else if (displayCharacter == '2') return 0x5B;
   else if (displayCharacter == '3') return 0x4F;
@@ -247,15 +254,12 @@ byte charToDisplayByte(char displayCharacter)
   else if (displayCharacter == '7') return 0x07;
   else if (displayCharacter == '8') return 0x7F;
   else if (displayCharacter == '9') return 0x6F;
-  // The characters are only able to displayed in one case (see left side)
-  // but we should be forgiving and let the user input the wrong case
-  else if ((displayCharacter == 'A') || (displayCharacter == 'a')) return 0x77;
-  else if ((displayCharacter == 'b') || (displayCharacter == 'B')) return 0x7C;
-  else if ((displayCharacter == 'C') || (displayCharacter == 'c')) return 0x39;
-  else if ((displayCharacter == 'd') || (displayCharacter == 'D')) return 0x5E;
-  else if ((displayCharacter == 'E') || (displayCharacter == 'e')) return 0x79;
-  else if ((displayCharacter == 'F') || (displayCharacter == 'f')) return 0x71;
-  // Anythin else turns into a blank for that character
+
+  // Lettering is incredibly hard because there isn't a good way to do
+  // many letters (k, w, v, x, etc) and because of case-sensitivity.
+  // Will need to do some thinking on how this should be accomplished
+  // in the future
+
+  // Anything else turns into a blank for that character space
   else { return NULL; }
 }
-
