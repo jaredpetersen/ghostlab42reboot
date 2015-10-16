@@ -1,0 +1,5 @@
+GhostLab42Reboot		KEYWORD1
+setup	                KEYWORD2
+print	                KEYWORD2
+resetDisplay	        KEYWORD2
+setDisplayBrightness	KEYWORD2

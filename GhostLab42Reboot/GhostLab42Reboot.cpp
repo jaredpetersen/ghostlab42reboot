@@ -5,7 +5,9 @@
  * See README.md and LICENSE for more information
  */
 
+#include "Arduino.h"
 #include "Wire.h"
+#include "GhostLab42Reboot.h"
 
 // Each I2C has a unique bus address
 #define IS31FL3730_DIGIT_4_I2C_ADDRESS 0x63 // 4 digit IS31FL3730 display
@@ -41,47 +43,30 @@ const byte IS31FL3730_PWM_Register = 0x19;
 // values for a blank display.
 const byte IS31FL3730_Reset_Register = 0xFF;
 
-
 /******************************************************************************
- *                             Arduino Functions                              *
+ *                                Constructor                                 *
  ******************************************************************************/
 
-/*
- * Android Setup Function
- */
-void setup() {
-  Wire.begin();
+GhostLab42Reboot::GhostLab42Reboot(){}
 
-  // Set the maximum display power for both displays
-  setDisplayPowerMax(4);
-  setDisplayPowerMax(6);
-}
+void GhostLab42Reboot::setup()
+{
+    Wire.begin();
 
-/*
- * Arduino Overall Looping Function
- */
-void loop() {
-  setDisplayBrightness(6, 0x02);
-
-  print(4, "1245");
-  delay(200);
-  print(4, "8251");
-  print(6, "5646431");
-
-  delay(500);
-  print(6, "1709752");
-  delay(500);
+    // Set the maximum display power for both displays
+    setDisplayPowerMax(4);
+    setDisplayPowerMax(6);
 }
 
 /******************************************************************************
- *                             Display Functions                              *
+ *                              Public Functions                              *
  ******************************************************************************/
 
 /*
  * Prints the characters to the selected display. The only characters allowed
  * are numbers 0-9 and letters A, b, C, d, E, and F
  */
-void print(int digits, char value[])
+void GhostLab42Reboot::print(int digits, char value[])
 {
   // User can technically give us any digit, so we have to do a nice
   // conversion with that data so that we can use it for proper iteration
@@ -127,7 +112,7 @@ void print(int digits, char value[])
  * digits Selects the display to set the current, 4 = 4 digit display and all
  *        others = 6 digit display
  */
-void resetDisplay(int digits)
+void GhostLab42Reboot::resetDisplay(int digits)
 {
   setupWireTransmission(digits);
 
@@ -150,7 +135,8 @@ void resetDisplay(int digits)
  * PWM    Sets the dimming level, not very linear. 0x80 = full intensity,
  *        0x00 is off
  */
-void setDisplayBrightness (int digits, byte PWM) {
+void GhostLab42Reboot::setDisplayBrightness (int digits, byte PWM)
+{
   // TODO Allow user setting in percentage with 100% being the useful register
   // value of 128 (0x80)
 
@@ -174,9 +160,8 @@ void setDisplayBrightness (int digits, byte PWM) {
   Wire.endTransmission();
 }
 
-
 /******************************************************************************
- *                              Helper Functions                              *
+ *                             Private Functions                              *
  ******************************************************************************/
 
 /*
@@ -186,7 +171,7 @@ void setDisplayBrightness (int digits, byte PWM) {
  * digits Selects the display to set the current, 4 = 4 digit display and all
  *        others = 6 digit display
  */
-void setDisplayPowerMin(int digits)
+void GhostLab42Reboot::setDisplayPowerMin(int digits)
 {
   setupWireTransmission(digits);
 
@@ -202,7 +187,8 @@ void setDisplayPowerMin(int digits)
  * digits Selects the display to set the current, 4 = 4 digit display and all
  *        others = 6 digit display
  */
-void setDisplayPowerMax(int digits) {
+void GhostLab42Reboot::setDisplayPowerMax(int digits)
+{
   // The display driver does allow currents greater than the displays should
   // take - do not allow anything over 20mA!
   // The display driver resets to 40mA per segment which is too much.  Somehow
@@ -220,7 +206,7 @@ void setDisplayPowerMax(int digits) {
 /*
  * Set up the Wire transmission depending on the display being used
  */
-void setupWireTransmission(int digits)
+void GhostLab42Reboot::setupWireTransmission(int digits)
 {
   if (digits == 4)
   {
@@ -237,7 +223,7 @@ void setupWireTransmission(int digits)
 /*
  * Converts characters into the appropriate bytes for display (gfedcba format)
  */
-byte charToDisplayByte(char displayCharacter)
+byte GhostLab42Reboot::charToDisplayByte(char displayCharacter)
 {
   // Although this isn't very time efficient (linear time) it's apparently a
   // very bad idea to use hashmaps on Arduino because they're resource
