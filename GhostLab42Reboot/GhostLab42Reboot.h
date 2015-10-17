@@ -8,21 +8,23 @@
 #ifndef GhostLab42Reboot_h
 #define GhostLab42Reboot_h
 
-#include "Arduino.h"
-#include "Wire.h"
+#include <Arduino.h>
+#include <Wire.h>
 
 class GhostLab42Reboot
 {
   public:
     GhostLab42Reboot();
-    void setup();
-    void print(int digits, char value[]);
+    void begin();
+    void write(int digits, char value[]);
+    void writeRandom(int digits);
     void resetDisplay(int digits);
     void setDisplayBrightness (int digits, byte PWM);
   private:
     void setDisplayPowerMin(int digits);
     void setDisplayPowerMax(int digits);
     void setupWireTransmission(int digits);
+    void getRandomString(int digits, char randomString[]);
     byte charToDisplayByte(char displayCharacter);
 };
 

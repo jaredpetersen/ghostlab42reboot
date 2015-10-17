@@ -5,8 +5,8 @@
  * See README.md and LICENSE for more information
  */
 
-#include "Arduino.h"
-#include "Wire.h"
+#include <Arduino.h>
+#include <Wire.h>
 #include "GhostLab42Reboot.h"
 
 // Each I2C has a unique bus address
@@ -49,7 +49,13 @@ const byte IS31FL3730_Reset_Register = 0xFF;
 
 GhostLab42Reboot::GhostLab42Reboot(){}
 
-void GhostLab42Reboot::setup()
+/*
+ * Acts as the Constructor
+ *
+ * Would have liked to just use the constructor, but you can't call
+ * Wire.begin there :-/
+ */
+void GhostLab42Reboot::begin()
 {
     Wire.begin();
 
@@ -63,17 +69,14 @@ void GhostLab42Reboot::setup()
  ******************************************************************************/
 
 /*
- * Prints the characters to the selected display. The only characters allowed
+ * Writes the characters to the selected display. The only characters allowed
  * are numbers 0-9 and letters A, b, C, d, E, and F
  */
-void GhostLab42Reboot::print(int digits, char value[])
+void GhostLab42Reboot::write(int digits, char value[])
 {
   // User can technically give us any digit, so we have to do a nice
   // conversion with that data so that we can use it for proper iteration
-  if (digits != 4)
-  {
-    digits = 6;
-  }
+  if (digits != 4) digits = 6;
 
   // Write the display data in the temporary registers
   setupWireTransmission(digits);
@@ -104,6 +107,22 @@ void GhostLab42Reboot::print(int digits, char value[])
   // End the Updte Column Register Transmission
   Wire.endTransmission();
 }
+
+/*
+ * Writes the characters to the selected display. The only characters allowed
+ * are numbers 0-9 and letters A, b, C, d, E, and F
+ */
+void GhostLab42Reboot::writeRandom(int digits)
+{
+  // User can technically give us any digit, so we have to do a nice
+  // conversion with that data so that we can use it for proper iteration
+  if (digits != 4) digits = 6;
+
+  char randomString[digits];
+  getRandomString(digits, randomString);
+  write(digits, randomString);
+}
+
 
 /*
  * Resets the display and sets the current to the maximum (5mA per segment)
@@ -205,6 +224,10 @@ void GhostLab42Reboot::setDisplayPowerMax(int digits)
 
 /*
  * Set up the Wire transmission depending on the display being used
+ *
+ * Parameters:
+ * digits Selects the display to set the current, 4 = 4 digit display and all
+ *        others = 6 digit display
  */
 void GhostLab42Reboot::setupWireTransmission(int digits)
 {
@@ -221,7 +244,26 @@ void GhostLab42Reboot::setupWireTransmission(int digits)
 }
 
 /*
+ * Gets a random number in the form of a character array for use on the
+ * display
+ *
+ * Parameters:
+ * digits       Selects the display to set the current, 4 = 4 digit display and
+ *              all others = 6 digit display
+ * randomString String pointer where the random integer will be displayed
+ *
+ */
+void GhostLab42Reboot::getRandomString(int digits, char randomString[])
+{
+  String str = String(random(100000, 999999));
+  str.toCharArray(randomString, digits + 1);
+}
+
+/*
  * Converts characters into the appropriate bytes for display (gfedcba format)
+ *
+ * Parameters:
+ * displayCharacter The character to be converted into a byte for the display
  */
 byte GhostLab42Reboot::charToDisplayByte(char displayCharacter)
 {
