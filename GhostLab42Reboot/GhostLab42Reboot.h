@@ -19,7 +19,7 @@ class GhostLab42Reboot
     void write(int digits, char value[]);
     void writeRandom(int digits);
     void resetDisplay(int digits);
-    void setDisplayBrightness (int digits, byte PWM);
+    void setDisplayBrightness (int digits, int brightness);
   private:
     void setDisplayPowerMin(int digits);
     void setDisplayPowerMax(int digits);

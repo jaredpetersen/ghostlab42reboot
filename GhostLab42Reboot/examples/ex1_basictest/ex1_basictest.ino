@@ -3,14 +3,16 @@
 
 GhostLab42Reboot reboot;
 
-void setup() 
+void setup()
 {
   reboot.begin();
 }
 
 void loop()
 {
-  reboot.setDisplayBrightness(6, 0x02);
+  // Set the six segment display brightness to 2%
+  reboot.setDisplayBrightness(6, 2);
+  // Write specific numbers to both displays in a flashing pattern
   reboot.write(4, "5678");
   reboot.write(6, "9146431");
   delay(200);

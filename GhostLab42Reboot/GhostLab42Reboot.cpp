@@ -149,33 +149,44 @@ void GhostLab42Reboot::resetDisplay(int digits)
  * Dims the display
  *
  * Parameters:
- * digits Selects the display to set the current, 4 = 4 digit display and all
- *        others = 6 digit display
- * PWM    Sets the dimming level, not very linear. 0x80 = full intensity,
- *        0x00 is off
+ * digits     Selects the display to set the current, 4 = 4 digit display and all
+ *            others = 6 digit display
+ * brightness The dimming level percentage as an int 0 - 100.
  */
-void GhostLab42Reboot::setDisplayBrightness (int digits, byte PWM)
+void GhostLab42Reboot::setDisplayBrightness (int digits, int brightness)
 {
-  // TODO Allow user setting in percentage with 100% being the useful register
-  // value of 128 (0x80)
+  // Setup brightness variable
+  byte PWM;
 
-  setupWireTransmission(digits);
-
-  // Begin dimming the display
-  Wire.write(IS31FL3730_PWM_Register); // Lighting Effect Register
-
-  // Do not allow the user to set values higher than the max allowed (always on)
-  if (PWM < 0x80)
+  // Convert brightness percent to PWM (0x80 is max, 128 settings total)
+  if (brightness <= 0)
   {
-    // Value is less than the max, set the requested value
-    Wire.write(PWM); // write the value that was requested
+    // User gave us a setting of less than or equal to 0%, just give them 0%
+    PWM = 0x00;
+  }
+  else if (brightness >= 100)
+  {
+    // User gave us a setting of more than or equal to 100%, just give them 100%
+    PWM = 0x80;
   }
   else
   {
-    // Value is higher than the max, set the max
-    Wire.write(0x80); // write the max value allowed (always on)
+    // User gave us something that we actually have to convert
+    // Have to include a cast to float, otherwise the whole thing gets
+    // converted to 0.00
+    float pwmPercent = ((float)brightness / 100) *  128;
+    PWM = pwmPercent; // Convert the float to byte
+
+    // Just another check to make sure the PWM doesn't exceed the max allowed
+    // A higher PWM could be very bad
+    if (PWM > 0x80) PWM = 0x80;
+    else if (PWM < 0x00) PWM = 0x00;
   }
 
+  // Begin dimming the display
+  setupWireTransmission(digits);
+  Wire.write(IS31FL3730_PWM_Register); // Lighting Effect Register
+  Wire.write(PWM); // write the value that was requested
   Wire.endTransmission();
 }
 
