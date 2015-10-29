@@ -8,8 +8,6 @@ The GhostLab42 Reboot Dual-Display Board Set, designed by Doug Keithley, is curr
 * [ex1_basictest](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/GhostLab42Reboot/examples/ex1_basictest/ex1_basictest.ino): Write numbers to the display
 * [ex2_random](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/GhostLab42Reboot/examples/ex2_random/ex2_random.ino): Write a random number to the display
 
-<img src="https://github.com/jaredpetersen/ghostlab42reboot/raw/master/documentation/images/writerandom.gif" height=200px;>
-
 # Functions
 * [begin()](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/documentation/functions/begin.md)
 * [write()](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/documentation/functions/write.md)
