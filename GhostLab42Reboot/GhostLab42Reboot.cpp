@@ -43,6 +43,22 @@ const byte IS31FL3730_PWM_Register = 0x19;
 // values for a blank display.
 const byte IS31FL3730_Reset_Register = 0xFF;
 
+// Light correction lookup table for the led displays
+// Human eyes do not view light linearly, so this corrects for that using
+// the CIE 1931 formula (see developer documentation)
+const byte lightCorrectionTable[] =
+{
+    0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02,
+    0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x04, 0x05,
+    0x05, 0x06, 0x06, 0x07, 0x07, 0x07, 0x08, 0x09, 0x09, 0x0A, 0x0A, 0x0B,
+    0x0C, 0x0C, 0x0D, 0x0E, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15,
+    0x15, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1F, 0x20, 0x21, 0x23,
+    0x24, 0x25, 0x27, 0x28, 0x2A, 0x2C, 0x2D, 0x2F, 0x31, 0x32, 0x34, 0x36,
+    0x38, 0x3A, 0x3C, 0x3E, 0x40, 0x42, 0x44, 0x46, 0x49, 0x4B, 0x4D, 0x50,
+    0x52, 0x54, 0x57, 0x5A, 0x5C, 0x5F, 0x62, 0x64, 0x67, 0x6A, 0x6D, 0x70,
+    0x73, 0x76, 0x79, 0x7D, 0x80
+};
+
 /******************************************************************************
  *                                Constructor                                 *
  ******************************************************************************/
@@ -155,38 +171,12 @@ void GhostLab42Reboot::resetDisplay(int digits)
  */
 void GhostLab42Reboot::setDisplayBrightness (int digits, int brightness)
 {
-  // Setup brightness variable
-  byte PWM;
-
-  // Convert brightness percent to PWM (0x80 is max, 128 settings total)
-  if (brightness <= 0)
-  {
-    // User gave us a setting of less than or equal to 0%, just give them 0%
-    PWM = 0x00;
-  }
-  else if (brightness >= 100)
-  {
-    // User gave us a setting of more than or equal to 100%, just give them 100%
-    PWM = 0x80;
-  }
-  else
-  {
-    // User gave us something that we actually have to convert
-    // Have to include a cast to float, otherwise the whole thing gets
-    // converted to 0.00
-    float pwmPercent = ((float)brightness / 100) *  128;
-    PWM = pwmPercent; // Convert the float to byte
-
-    // Just another check to make sure the PWM doesn't exceed the max allowed
-    // A higher PWM could be very bad
-    if (PWM > 0x80) PWM = 0x80;
-    else if (PWM < 0x00) PWM = 0x00;
-  }
-
   // Begin dimming the display
   setupWireTransmission(digits);
-  Wire.write(IS31FL3730_PWM_Register); // Lighting Effect Register
-  Wire.write(PWM); // write the value that was requested
+  // Tell the lighting effect register to display at the desired
+  // brightness level with values from the light correction lookup table
+  Wire.write(IS31FL3730_PWM_Register);
+  Wire.write(lightCorrectionTable[brightness]);
   Wire.endTransmission();
 }
 

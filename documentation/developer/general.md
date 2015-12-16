@@ -27,10 +27,13 @@ The display was designed for 20mA per segment max, and the display driver defaul
 The I2C command stream consists of the device address, followed by the register index, followed by the data to be written to that register.  Subsequent bytes will be written to the next register index.
 
 ## Electrical Connections
-Included wires for this demo board are badly color coded, but here they are:
+Included wires for this demo board are poorly color coded, but here they are:
 * Power
   * Yellow -> 5V
   * White  -> GND
 * I2C (Arduino UNO)
   * Red    -> SDA (or ANALOG IN A4)
   * Black  -> SCL (or ANALOG IN A5)
+
+## Display Brightness
+LEDs display light linearly, but human eyes perceive light logarithmically. The setDisplayBrightness function deals with this by taking advantage of a lookup table that has the proper light display values (0 - 128) for each of the possible input light percentage levels (0 - 100%). The lookup table was generated using the CIE 1931 lightness formula ([1](http://jared.geek.nz/2013/feb/linear-led-pwm) [2](http://forum.arduino.cc/index.php/topic,147810.0.html) [3](http://forum.allaboutcircuits.com/threads/led-brightness-vs-pwm.83957/)). The problem with using this approach if the user tries to input either 1% or 2%, the display would not be turned on. To fix this, 1% and 2% brightness have just been hardcoded. A copy of the lookup table can be found at `brightnesstable.md`.
