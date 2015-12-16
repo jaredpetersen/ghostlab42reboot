@@ -14,26 +14,22 @@
 #define IS31FL3730_DIGIT_6_I2C_ADDRESS 0x60 // 6 digit IS31FL3730 display
 
 // "Matrix 1 Data Register" index in the IS31FL3730
-// 8 bit value to define which segments are lit. 0 == off, 1 == on
-// This is the starting index.  Sequential bytes will go to the next
+// 8-bit value to define which segments are lit.
+// This is the starting index. Sequential bytes will go to the next
 // register index.
-// Works great for data, but stop after the matrix data is updated and then
-// end the command.
 const byte IS31FL3730_Data_Registers = 0x01;
 
 // "Update Column Register" index in the IS31FL3730
 // The data sent to the Data Registers will be stored in temporary registers
 // A write operation of any 8-bit value to the Update Column Register is
-// required to update the Data Registers (01h~0Bh, 0Eh~18h)
+// required to update the Data Registers
 const byte IS31FL3730_Update_Column_Register = 0x0C;
 
 // "Lighting Effect Register" index in the IS31FL3730
 const byte IS31FL3730_Lighting_Effect_Register = 0x0D;
 
 // "PWM Register" index in the IS31FL3730
-// The PWM Register can modulate LED light with 128 different items --
-// When the D7 set to “1”, the PWM is the 128 item
-// When the D7 set to “0”, D6:D0 set the PWM from the 0 item to the 127 item
+// The PWM Register can modulate LED light at 128 different points
 const byte IS31FL3730_PWM_Register = 0x19;
 
 // "Reset Register" index in the IS31FL3730
@@ -126,7 +122,7 @@ void GhostLab42Reboot::write(int digits, char value[])
 
 /*
  * Writes the characters to the selected display. The only characters allowed
- * are numbers 0-9 and letters A, b, C, d, E, and F
+ * are numbers 0-9
  */
 void GhostLab42Reboot::writeRandom(int digits)
 {
@@ -290,5 +286,5 @@ byte GhostLab42Reboot::charToDisplayByte(char displayCharacter)
   // in the future
 
   // Anything else turns into a blank for that character space
-  else { return NULL; }
+  else return NULL;
 }

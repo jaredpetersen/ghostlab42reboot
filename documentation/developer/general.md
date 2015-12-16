@@ -10,17 +10,21 @@ The 31FL3730 is a write only device, so no way to verify that the data was recei
 
 Each digit and associated decimal point are in one register.  Writing to the register will only update a temporary register and you must write (anything) to the "Update Column Register", 0x0C, to get the display to show what you wrote to these temporary registers.
 
-Single segment values:
-.     --0x01--
-.    |        |
-.   0x20     0x02
-.    |        |
-.     --0x40--
-.    |        |
-.   0x10     0x04
-.    |        |
-.     --0x08--
-.                0x80
+Single segment display values (gfedcba format):
+```
+     --0x01--
+    |        |
+   0x20     0x02
+    |        |
+     --0x40--
+    |        |
+   0x10     0x04
+    |        |
+     --0x08--
+                0x80
+```
+
+More information on displaying items on a seven segment display can be found [here](http://www.learningembedded.com/arduino/arduino-seven-segment-interfacing/).
 
 The display was designed for 20mA per segment max, and the display driver defaults to 40mA, so this needs to be corrected immediately.  It may be useful to update the power after every command since the display may become unplugged and we don't ever want to use the default current setting.
 
@@ -36,4 +40,4 @@ Included wires for this demo board are poorly color coded, but here they are:
   * Black  -> SCL (or ANALOG IN A5)
 
 ## Display Brightness
-LEDs display light linearly, but human eyes perceive light logarithmically. The setDisplayBrightness function deals with this by taking advantage of a lookup table that has the proper light display values (0 - 128) for each of the possible input light percentage levels (0 - 100%). The lookup table was generated using the CIE 1931 lightness formula ([1](http://jared.geek.nz/2013/feb/linear-led-pwm) [2](http://forum.arduino.cc/index.php/topic,147810.0.html) [3](http://forum.allaboutcircuits.com/threads/led-brightness-vs-pwm.83957/)). The problem with using this approach if the user tries to input either 1% or 2%, the display would not be turned on. To fix this, 1% and 2% brightness have just been hardcoded. A copy of the lookup table can be found at `brightnesstable.md`.
+LEDs display light linearly, but human eyes perceive light logarithmically. The setDisplayBrightness function deals with this by taking advantage of a lookup table that has the proper light display values (0 - 128) for each of the possible input light percentage levels (0 - 100%). The lookup table was generated using the CIE 1931 lightness formula ([[1]](http://jared.geek.nz/2013/feb/linear-led-pwm) [[2]](http://forum.arduino.cc/index.php/topic,147810.0.html) [[3]](http://forum.allaboutcircuits.com/threads/led-brightness-vs-pwm.83957/)). The problem with using this approach if the user tries to input either 1% or 2%, the display would not be turned on. To fix this, 1% and 2% brightness have just been hardcoded. A copy of the lookup table can be found at `brightnesstable.md`.
