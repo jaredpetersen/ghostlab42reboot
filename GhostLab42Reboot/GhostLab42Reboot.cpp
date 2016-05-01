@@ -84,7 +84,7 @@ void GhostLab42Reboot::begin()
  * Writes the characters to the selected display. The only characters allowed
  * are numbers 0-9 and letters A, b, C, d, E, and F
  */
-void GhostLab42Reboot::write(int digits, char value[])
+void GhostLab42Reboot::write(int digits, String value)
 {
   // User can technically give us any digit, so we have to do a nice
   // conversion with that data so that we can use it for proper iteration
@@ -100,7 +100,7 @@ void GhostLab42Reboot::write(int digits, char value[])
   // in the remaining spots
   for (int i = 0; i < digits; i++)
   {
-    Wire.write(charToDisplayByte(value[i]));
+    Wire.write(charToDisplayByte(value.charAt(i)));
   }
 
   // End the temporary register transmission
