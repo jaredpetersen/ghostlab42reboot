@@ -121,22 +121,6 @@ void GhostLab42Reboot::write(int digits, String value)
 }
 
 /*
- * Writes the characters to the selected display. The only characters allowed
- * are numbers 0-9
- */
-void GhostLab42Reboot::writeRandom(int digits)
-{
-  // User can technically give us any digit, so we have to do a nice
-  // conversion with that data so that we can use it for proper iteration
-  if (digits != 4) digits = 6;
-
-  char randomString[digits];
-  getRandomString(digits, randomString);
-  write(digits, randomString);
-}
-
-
-/*
  * Resets the display and sets the current to the maximum (5mA per segment)
  *
  * Parameters:
@@ -238,22 +222,6 @@ void GhostLab42Reboot::setupWireTransmission(int digits)
     // Use the six digit display
     Wire.beginTransmission(IS31FL3730_DIGIT_6_I2C_ADDRESS);
   }
-}
-
-/*
- * Gets a random number in the form of a character array for use on the
- * display
- *
- * Parameters:
- * digits       Selects the display to set the current, 4 = 4 digit display and
- *              all others = 6 digit display
- * randomString String pointer where the random integer will be displayed
- *
- */
-void GhostLab42Reboot::getRandomString(int digits, char randomString[])
-{
-  String str = String(random(100000, 999999));
-  str.toCharArray(randomString, digits + 1);
 }
 
 /*

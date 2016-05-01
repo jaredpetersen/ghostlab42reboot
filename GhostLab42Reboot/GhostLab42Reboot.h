@@ -17,14 +17,12 @@ class GhostLab42Reboot
     GhostLab42Reboot();
     void begin();
     void write(int digits, String value);
-    void writeRandom(int digits);
     void resetDisplay(int digits);
     void setDisplayBrightness (int digits, int brightness);
   private:
     void setDisplayPowerMin(int digits);
     void setDisplayPowerMax(int digits);
     void setupWireTransmission(int digits);
-    void getRandomString(int digits, char randomString[]);
     byte charToDisplayByte(char displayCharacter);
 };
 
