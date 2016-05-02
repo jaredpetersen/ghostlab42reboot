@@ -100,7 +100,7 @@ void GhostLab42Reboot::write(int digits, String value)
   // in the remaining spots
   for (int i = 0; i < digits; i++)
   {
-    Wire.write(charToDisplayByte(value.charAt(i)));
+    writeCharacter(value.charAt(i));
   }
 
   // End the temporary register transmission
@@ -228,31 +228,68 @@ void GhostLab42Reboot::setupWireTransmission(int digits)
  * Converts characters into the appropriate bytes for display (gfedcba format)
  *
  * Parameters:
- * displayCharacter The character to be converted into a byte for the display
+ * displayCharacter The character(s) to be converted into a byte for the
+ *                  display. Some characters like "W" need multiple digits.
  */
-byte GhostLab42Reboot::charToDisplayByte(char displayCharacter)
+void GhostLab42Reboot::writeCharacter(char displayCharacter)
 {
   // Although this isn't very time efficient (linear time) it's apparently a
   // very bad idea to use hashmaps on Arduino because they're resource
   // intensive :-(
 
   // Numbers
-  if      (displayCharacter == '0') return 0x3F;
-  else if (displayCharacter == '1') return 0x06;
-  else if (displayCharacter == '2') return 0x5B;
-  else if (displayCharacter == '3') return 0x4F;
-  else if (displayCharacter == '4') return 0x66;
-  else if (displayCharacter == '5') return 0x6D;
-  else if (displayCharacter == '6') return 0x7D;
-  else if (displayCharacter == '7') return 0x07;
-  else if (displayCharacter == '8') return 0x7F;
-  else if (displayCharacter == '9') return 0x6F;
+  if      (displayCharacter == '0') Wire.write(0x3F);
+  else if (displayCharacter == '1') Wire.write(0x06);
+  else if (displayCharacter == '2') Wire.write(0x5B);
+  else if (displayCharacter == '3') Wire.write(0x4F);
+  else if (displayCharacter == '4') Wire.write(0x66);
+  else if (displayCharacter == '5') Wire.write(0x6D);
+  else if (displayCharacter == '6') Wire.write(0x7D);
+  else if (displayCharacter == '7') Wire.write(0x07);
+  else if (displayCharacter == '8') Wire.write(0x7F);
+  else if (displayCharacter == '9') Wire.write(0x6F);
 
-  // Lettering is incredibly hard because there isn't a good way to do
-  // many letters (k, w, v, x, etc) and because of case-sensitivity.
-  // Will need to do some thinking on how this should be accomplished
-  // in the future
+  // Letters
+  else if (displayCharacter == 'A' || displayCharacter == 'a') Wire.write(0x77);
+  else if (displayCharacter == 'B' || displayCharacter == 'b') Wire.write(0x7C);
+  else if (displayCharacter == 'C' || displayCharacter == 'c') Wire.write(0x39);
+  else if (displayCharacter == 'D' || displayCharacter == 'd') Wire.write(0x5E);
+  else if (displayCharacter == 'E' || displayCharacter == 'e') Wire.write(0x79);
+  else if (displayCharacter == 'F' || displayCharacter == 'f') Wire.write(0x71);
+  else if (displayCharacter == 'G' || displayCharacter == 'g') Wire.write(0x3D);
+  else if (displayCharacter == 'H' || displayCharacter == 'h') Wire.write(0x76);
+  else if (displayCharacter == 'I' || displayCharacter == 'i') Wire.write(0x06);
+  else if (displayCharacter == 'J' || displayCharacter == 'j') Wire.write(0x1E);
+  else if (displayCharacter == 'K' || displayCharacter == 'k') Wire.write(0x76);
+  else if (displayCharacter == 'L' || displayCharacter == 'l') Wire.write(0x38);
+  else if (displayCharacter == 'M' || displayCharacter == 'm')
+  {
+      Wire.write(0x33);
+      Wire.write(0x27);
+  }
+  else if (displayCharacter == 'N' || displayCharacter == 'n') Wire.write(0x54);
+  else if (displayCharacter == 'O' || displayCharacter == 'o') Wire.write(0x3F);
+  else if (displayCharacter == 'P' || displayCharacter == 'p') Wire.write(0x73);
+  else if (displayCharacter == 'Q' || displayCharacter == 'q') Wire.write(0x67);
+  else if (displayCharacter == 'R' || displayCharacter == 'r') Wire.write(0x50);
+  else if (displayCharacter == 'S' || displayCharacter == 's') Wire.write(0x6D);
+  else if (displayCharacter == 'T' || displayCharacter == 't') Wire.write(0x78);
+  else if (displayCharacter == 'U' || displayCharacter == 'u') Wire.write(0x3E);
+  else if (displayCharacter == 'V' || displayCharacter == 'v') Wire.write(0x3E);
+  else if (displayCharacter == 'W' || displayCharacter == 'w')
+  {
+      Wire.write(0x3C);
+      Wire.write(0x1E);
+  }
+  else if (displayCharacter == 'X' || displayCharacter == 'x') Wire.write(0x76);
+  else if (displayCharacter == 'Y' || displayCharacter == 'y') Wire.write(0x6E);
+  else if (displayCharacter == 'Z' || displayCharacter == 'z') Wire.write(0x5B);
+
+  // Symbols
+  else if (displayCharacter == '?') Wire.write(0xA3);
+  else if (displayCharacter == '!') Wire.write(0x82);
+  else if (displayCharacter == '-') Wire.write(0x40);
 
   // Anything else turns into a blank for that character space
-  else return NULL;
+  else Wire.write(0x00);
 }
