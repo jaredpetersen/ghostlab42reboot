@@ -12,6 +12,5 @@ The GhostLab42 Reboot Dual-Display Board Set, designed by Doug Keithley, is curr
 # Functions
 * [begin()](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/documentation/functions/begin.md)
 * [write()](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/documentation/functions/write.md)
-* [writeRandom()](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/documentation/functions/writerandom.md)
 * [resetDisplay()](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/documentation/functions/resetdisplay.md)
 * [setDisplayBrightness()](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/documentation/functions/setdisplaybrightness.md)
