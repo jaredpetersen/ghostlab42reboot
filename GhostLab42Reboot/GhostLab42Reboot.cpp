@@ -90,17 +90,45 @@ void GhostLab42Reboot::write(int digits, String value)
   // conversion with that data so that we can use it for proper iteration
   if (digits != 4) digits = 6;
 
+  // Reset the display before writing
+  resetDisplay(digits);
+
   // Write the display data in the temporary registers
   setupWireTransmission(digits);
   Wire.write(IS31FL3730_Data_Registers);
+
+  // Character array that stores the substring that is to be written
+  char substringValue[2];
 
   // Iterate over the print value and print out the individual characters
   // Any string that goes over the number of digits gets cut off
   // Any string that goes under the number of digits has blank spaces in
   // in the remaining spots
-  for (int i = 0; i < digits; i++)
+  for (int i = 0; i < value.length(); i++)
   {
-    writeCharacter(value.charAt(i));
+    // Determine how the character should be written
+    if (value.charAt(i + 1) == '.')
+    {
+      // There is a decimal, write it as part of the character
+      // Prepare the substring
+      substringValue[0] = value.charAt(i);
+      substringValue[1] = value.charAt(i + 1);
+
+      // Skip the decimal
+      i++;
+    }
+    else
+    {
+      // There isn't a decimal, write the character normally
+      // Prepare the substring
+      substringValue[0] = value.charAt(i);
+    }
+
+    // Write the substring
+    writeCharacter(substringValue);
+
+    // Clear out the substring array
+    memset(&substringValue[0], 0, sizeof(substringValue));
   }
 
   // End the temporary register transmission
@@ -228,67 +256,75 @@ void GhostLab42Reboot::setupWireTransmission(int digits)
  * Converts characters into the appropriate bytes for display (gfedcba format)
  *
  * Parameters:
- * displayCharacter The character(s) to be converted into a byte for the
- *                  display. Some characters like "W" need multiple digits.
+ * displayCharacters The character(s) to be converted into a byte for the
+ *                   display. Some characters like "W" need multiple digits.
  */
-void GhostLab42Reboot::writeCharacter(char displayCharacter)
+void GhostLab42Reboot::writeCharacter(char displayCharacters[])
 {
   // Although this isn't very time efficient (linear time) it's apparently a
   // very bad idea to use hashmaps on Arduino because they're resource
   // intensive :-(
 
+  // Sometimes decimals are involved, so we need something to add it
+  byte decimalOffset = 0x00; // No decimal to add
+  if (displayCharacters[1] == '.')
+  {
+    // Add a decimal
+    decimalOffset = 0x80;
+  }
+
   // Numbers
-  if      (displayCharacter == '0') Wire.write(0x3F);
-  else if (displayCharacter == '1') Wire.write(0x06);
-  else if (displayCharacter == '2') Wire.write(0x5B);
-  else if (displayCharacter == '3') Wire.write(0x4F);
-  else if (displayCharacter == '4') Wire.write(0x66);
-  else if (displayCharacter == '5') Wire.write(0x6D);
-  else if (displayCharacter == '6') Wire.write(0x7D);
-  else if (displayCharacter == '7') Wire.write(0x07);
-  else if (displayCharacter == '8') Wire.write(0x7F);
-  else if (displayCharacter == '9') Wire.write(0x6F);
+  if      (displayCharacters[0] == '0') Wire.write(0x3F + decimalOffset);
+  else if (displayCharacters[0] == '1') Wire.write(0x06 + decimalOffset);
+  else if (displayCharacters[0] == '2') Wire.write(0x5B + decimalOffset);
+  else if (displayCharacters[0] == '3') Wire.write(0x4F + decimalOffset);
+  else if (displayCharacters[0] == '4') Wire.write(0x66 + decimalOffset);
+  else if (displayCharacters[0] == '5') Wire.write(0x6D + decimalOffset);
+  else if (displayCharacters[0] == '6') Wire.write(0x7D + decimalOffset);
+  else if (displayCharacters[0] == '7') Wire.write(0x07 + decimalOffset);
+  else if (displayCharacters[0] == '8') Wire.write(0x7F + decimalOffset);
+  else if (displayCharacters[0] == '9') Wire.write(0x6F + decimalOffset);
 
   // Letters
-  else if (displayCharacter == 'A' || displayCharacter == 'a') Wire.write(0x77);
-  else if (displayCharacter == 'B' || displayCharacter == 'b') Wire.write(0x7C);
-  else if (displayCharacter == 'C' || displayCharacter == 'c') Wire.write(0x39);
-  else if (displayCharacter == 'D' || displayCharacter == 'd') Wire.write(0x5E);
-  else if (displayCharacter == 'E' || displayCharacter == 'e') Wire.write(0x79);
-  else if (displayCharacter == 'F' || displayCharacter == 'f') Wire.write(0x71);
-  else if (displayCharacter == 'G' || displayCharacter == 'g') Wire.write(0x3D);
-  else if (displayCharacter == 'H' || displayCharacter == 'h') Wire.write(0x76);
-  else if (displayCharacter == 'I' || displayCharacter == 'i') Wire.write(0x06);
-  else if (displayCharacter == 'J' || displayCharacter == 'j') Wire.write(0x1E);
-  else if (displayCharacter == 'K' || displayCharacter == 'k') Wire.write(0x76);
-  else if (displayCharacter == 'L' || displayCharacter == 'l') Wire.write(0x38);
-  else if (displayCharacter == 'M' || displayCharacter == 'm')
+  else if (displayCharacters[0] == 'A' || displayCharacters[0] == 'a') Wire.write(0x77 + decimalOffset);
+  else if (displayCharacters[0] == 'B' || displayCharacters[0] == 'b') Wire.write(0x7C + decimalOffset);
+  else if (displayCharacters[0] == 'C' || displayCharacters[0] == 'c') Wire.write(0x39 + decimalOffset);
+  else if (displayCharacters[0] == 'D' || displayCharacters[0] == 'd') Wire.write(0x5E + decimalOffset);
+  else if (displayCharacters[0] == 'E' || displayCharacters[0] == 'e') Wire.write(0x79 + decimalOffset);
+  else if (displayCharacters[0] == 'F' || displayCharacters[0] == 'f') Wire.write(0x71 + decimalOffset);
+  else if (displayCharacters[0] == 'G' || displayCharacters[0] == 'g') Wire.write(0x3D + decimalOffset);
+  else if (displayCharacters[0] == 'H' || displayCharacters[0] == 'h') Wire.write(0x76 + decimalOffset);
+  else if (displayCharacters[0] == 'I' || displayCharacters[0] == 'i') Wire.write(0x06 + decimalOffset);
+  else if (displayCharacters[0] == 'J' || displayCharacters[0] == 'j') Wire.write(0x1E + decimalOffset);
+  else if (displayCharacters[0] == 'K' || displayCharacters[0] == 'k') Wire.write(0x76 + decimalOffset);
+  else if (displayCharacters[0] == 'L' || displayCharacters[0] == 'l') Wire.write(0x38 + decimalOffset);
+  else if (displayCharacters[0] == 'M' || displayCharacters[0] == 'm')
   {
       Wire.write(0x33);
-      Wire.write(0x27);
+      Wire.write(0x27 + decimalOffset);
   }
-  else if (displayCharacter == 'N' || displayCharacter == 'n') Wire.write(0x54);
-  else if (displayCharacter == 'O' || displayCharacter == 'o') Wire.write(0x3F);
-  else if (displayCharacter == 'P' || displayCharacter == 'p') Wire.write(0x73);
-  else if (displayCharacter == 'Q' || displayCharacter == 'q') Wire.write(0x67);
-  else if (displayCharacter == 'R' || displayCharacter == 'r') Wire.write(0x50);
-  else if (displayCharacter == 'S' || displayCharacter == 's') Wire.write(0x6D);
-  else if (displayCharacter == 'T' || displayCharacter == 't') Wire.write(0x78);
-  else if (displayCharacter == 'U' || displayCharacter == 'u') Wire.write(0x3E);
-  else if (displayCharacter == 'V' || displayCharacter == 'v') Wire.write(0x3E);
-  else if (displayCharacter == 'W' || displayCharacter == 'w')
+  else if (displayCharacters[0] == 'N' || displayCharacters[0] == 'n') Wire.write(0x54 + decimalOffset);
+  else if (displayCharacters[0] == 'O' || displayCharacters[0] == 'o') Wire.write(0x3F + decimalOffset);
+  else if (displayCharacters[0] == 'P' || displayCharacters[0] == 'p') Wire.write(0x73 + decimalOffset);
+  else if (displayCharacters[0] == 'Q' || displayCharacters[0] == 'q') Wire.write(0x67 + decimalOffset);
+  else if (displayCharacters[0] == 'R' || displayCharacters[0] == 'r') Wire.write(0x50 + decimalOffset);
+  else if (displayCharacters[0] == 'S' || displayCharacters[0] == 's') Wire.write(0x6D + decimalOffset);
+  else if (displayCharacters[0] == 'T' || displayCharacters[0] == 't') Wire.write(0x78 + decimalOffset);
+  else if (displayCharacters[0] == 'U' || displayCharacters[0] == 'u') Wire.write(0x3E + decimalOffset);
+  else if (displayCharacters[0] == 'V' || displayCharacters[0] == 'v') Wire.write(0x3E + decimalOffset);
+  else if (displayCharacters[0] == 'W' || displayCharacters[0] == 'w')
   {
       Wire.write(0x3C);
-      Wire.write(0x1E);
+      Wire.write(0x1E + decimalOffset);
   }
-  else if (displayCharacter == 'X' || displayCharacter == 'x') Wire.write(0x76);
-  else if (displayCharacter == 'Y' || displayCharacter == 'y') Wire.write(0x6E);
-  else if (displayCharacter == 'Z' || displayCharacter == 'z') Wire.write(0x5B);
+  else if (displayCharacters[0] == 'X' || displayCharacters[0] == 'x') Wire.write(0x76 + decimalOffset);
+  else if (displayCharacters[0] == 'Y' || displayCharacters[0] == 'y') Wire.write(0x6E + decimalOffset);
+  else if (displayCharacters[0] == 'Z' || displayCharacters[0] == 'z') Wire.write(0x5B + decimalOffset);
 
   // Symbols
-  else if (displayCharacter == '?') Wire.write(0xA3);
-  else if (displayCharacter == '!') Wire.write(0x82);
-  else if (displayCharacter == '-') Wire.write(0x40);
+  else if (displayCharacters[0] == '?') Wire.write(0xA3);
+  else if (displayCharacters[0] == '!') Wire.write(0x82);
+  else if (displayCharacters[0] == '-') Wire.write(0x40);
 
   // Anything else turns into a blank for that character space
   else Wire.write(0x00);

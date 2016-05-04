@@ -23,7 +23,7 @@ class GhostLab42Reboot
     void setDisplayPowerMin(int digits);
     void setDisplayPowerMax(int digits);
     void setupWireTransmission(int digits);
-    byte charToDisplayByte(char displayCharacter);
+    void writeCharacter(char displayCharacters[]);
 };
 
 #endif
