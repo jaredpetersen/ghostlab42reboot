@@ -1,6 +1,6 @@
 # write(int digits, String value)
 ### Description
-Writes characters to the display. Supports integers, decimals, letters, and some punctuation (periods, question marks, exclamation points, and hyphens).
+Writes characters to the display. Supports integers, decimals, letters, and some punctuation (periods, question marks, exclamation points, and hyphens). Please note that decimals/periods will be wrapped into the previous character's digit display unless extra "spaces" are inserted or if the decimal/period is the first character in the input string (in which case there is technically a "space" added in front of it).
 
 If the number of characters being written exceed the display length, the display will cut off the overflowing characters. For example, writing a string with six digits like "012345" to the four-segment display will result in the display only showing "0123".
 

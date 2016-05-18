@@ -13,8 +13,16 @@ void setup()
 void loop()
 {
   // String to be scrolled across the display
-  // Needs the extra spaces to make the scrolling smooth
+  // Need the extra spaces to make the scrolling smooth
   String displayText = "      Who ya gonna call?     Ghostbusters!";
+
+  // A NOTE ABOUT SCROLLING:
+  // This works fine if there are not any periods/decimals, since a period/decimal
+  // is either considered part of the previous character or its own character if
+  // it is in the first position of the display (in which case there is technically
+  // a "space" in front of it)
+  // Check out ex4_scrollingtextadvanced instead if you are planning on scrolling a
+  // string with a period/decimal
 
   // Commence scrolling
   for (int i = 0; i < displayText.length(); i++)

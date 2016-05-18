@@ -107,7 +107,14 @@ void GhostLab42Reboot::write(int digits, String value)
   for (int i = 0; i < value.length(); i++)
   {
     // Determine how the character should be written
-    if (value.charAt(i + 1) == '.')
+    // Handle decimal as first character
+    if (value.charAt(i) == '.' and (i == 0 || value.charAt(i - 1) == '.'))
+    {
+      substringValue[0] = ' ';
+      substringValue[1] = value.charAt(i);
+    }
+    // Handle decimal after a regular character
+    else if (value.charAt(i + 1) == '.')
     {
       // There is a decimal, write it as part of the character
       // Prepare the substring
@@ -325,6 +332,7 @@ void GhostLab42Reboot::writeCharacter(char displayCharacters[])
   else if (displayCharacters[0] == '?') Wire.write(0xA3);
   else if (displayCharacters[0] == '!') Wire.write(0x82);
   else if (displayCharacters[0] == '-') Wire.write(0x40);
+  else if (displayCharacters[0] == ' ') Wire.write(0x00 + decimalOffset);
 
   // Anything else turns into a blank for that character space
   else Wire.write(0x00);
