@@ -1,6 +1,5 @@
 GhostLab42Reboot	    KEYWORD1
 begin	                KEYWORD2
 write	                KEYWORD2
-writeRandom	            KEYWORD2
 resetDisplay	        KEYWORD2
 setDisplayBrightness	KEYWORD2
