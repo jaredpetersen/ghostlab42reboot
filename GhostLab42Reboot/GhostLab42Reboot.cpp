@@ -91,8 +91,13 @@ void GhostLab42Reboot::write(int displayID, String value)
   // Verify the display exists before attempting to write to it
   if (verifyDisplayID(displayID) == false) return;
 
-  // Reset the display before writing
+  // Clear the display before writing
   resetDisplay(displayID);
+
+  // Make sure the maximum current for the display is not exceeded
+  // This is already done in resetDisplay, but it is extremely critical that
+  // the current does not exceed the maximum
+  setDisplayPowerMax(displayID);
 
   // Write the display data in the temporary registers
   setupWireTransmission(displayID);
@@ -142,6 +147,10 @@ void GhostLab42Reboot::write(int displayID, String value)
   // End the temporary register transmission
   Wire.endTransmission();
 
+  // Set the current again, in case a wire was unplugged sometime between
+  // the last current reset and now
+  setDisplayPowerMax(displayID);
+
   // Transfer the display data from the temporary registers to the display
   setupWireTransmission(displayID);
 
@@ -157,7 +166,7 @@ void GhostLab42Reboot::write(int displayID, String value)
 }
 
 /*
- * Resets the display and sets the current to the maximum (5mA per segment)
+ * Resets the display and sets the current to the maximum allowed
  *
  * Parameters:
  * displayID Unique identifier for the display
@@ -167,20 +176,24 @@ void GhostLab42Reboot::resetDisplay(int displayID)
   // Verify the display exists before attempting to reset it
   if (verifyDisplayID(displayID) == false) return;
 
+  // Make sure the maximum current for the display is not exceeded
+  setDisplayPowerMax(displayID);
+
   setupWireTransmission(displayID);
 
-  // Reset the lighting effects (dim, bright, etc.)
-  // Send any value to reset the lighting (value ignored)
+  // Reset the display so that the display is blank
+  // Send any value to reset the display (value ignored)
   Wire.write(IS31FL3730_Reset_Register);
   Wire.write(0x00);
   Wire.endTransmission();
 
-  // Reset the current
+  // Reset the current again, just to be careful since the display
+  // was just reset
   setDisplayPowerMax(displayID);
 }
 
 /**
- * Dims the display
+ * Set the brightness level of the display
  *
  * Parameters:
  * displayID  Unique identifier for the display
@@ -190,6 +203,9 @@ void GhostLab42Reboot::setDisplayBrightness (int displayID, int brightness)
 {
   // Verify the display exists before attempting to set its brightness
   if (verifyDisplayID(displayID) == false) return;
+
+  // Make sure the maximum current for the display is not exceeded
+  setDisplayPowerMax(displayID);
 
   // Begin dimming the display
   setupWireTransmission(displayID);
@@ -220,6 +236,8 @@ bool GhostLab42Reboot::verifyDisplayID(int displayID)
 
 /*
  * Sets the current to the minimum (5mA per segment)
+ * Not currently in use by the library, but it is good to keep it around
+ * as an option for more advanced users
  *
  * Parameters:
  * displayID Unique identifier for the display
@@ -241,12 +259,13 @@ void GhostLab42Reboot::setDisplayPowerMin(int displayID)
  */
 void GhostLab42Reboot::setDisplayPowerMax(int displayID)
 {
-  // The display driver does allow currents greater than the displays should
+  // The display driver allows currents greater than the displays should
   // take - do not allow anything over 20mA!
-  // The display driver resets to 40mA per segment which is too much.  Somehow
-  // we need to make sure that is never violated but the part is write-only, so
-  // we need to keep track of the setting somewhere or just always force to the
-  // max current.
+  // The display driver resets to 40mA per segment which is too much. This
+  // should be called before every function that writes to the display to
+  // ensure that the current is not exceeded in the case that a wire is
+  // accidentally disconnected
+
   setupWireTransmission(displayID);
 
   Wire.write(IS31FL3730_Lighting_Effect_Register);

@@ -1,4 +1,4 @@
-# Brightness Lookup table
+# Brightness Lookup Table
 For context, view the main developer info file, `general.md`.
 
 | Brightness | CIE | Byte   |

@@ -27,9 +27,9 @@ Single segment display values (gfedcba format):
 
 More information on displaying items on a seven segment display can be found [here](http://www.learningembedded.com/arduino/arduino-seven-segment-interfacing/).
 
-The display was designed for 20mA per segment max, and the display driver defaults to 40mA, so this needs to be corrected immediately.  It may be useful to update the power after every command since the display may become unplugged and we don't ever want to use the default current setting.
+The display was designed for 20mA per segment max, and the display driver defaults to 40mA, so this needs to be corrected immediately. The display power is reset to the maximum allowed before every command since the display may become unplugged and we don't ever want to use the default current setting. A private function `setDisplayPowerMin(int displayID)` is included for developers that would like to use the minimum current setting instead. For alternative current settings, please see `currenttable.md`.
 
-The I2C command stream consists of the device address, followed by the register index, followed by the data to be written to that register.  Subsequent bytes will be written to the next register index.
+The I2C command stream consists of the device address, followed by the register index, followed by the data to be written to that register. Subsequent bytes will be written to the next register index.
 
 ## Electrical Connections
 Included wires for the board are poorly color-coded, but are the following:
