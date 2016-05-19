@@ -1,9 +1,9 @@
-# setDisplayBrightness(int digits, int brightness)
+# setDisplayBrightness(int displayID, int brightness)
 ### Description
 Changes the brightness level of the display via a percentage.
 
 ### Parameters
-digits: The display to write to. Input 4 for the four-segment display or 6 for the six-segment display.
+displayID: Unique identifier for the display that is to have its brightness set. Input 1 for the four-digit display, 2 for the smaller four-digit display, or 3 for the six-digit display.
 
 brightness: The brightness level of the display as a percentage (ex. 100 = 100%, 25 = 25%, etc.).
 
@@ -11,6 +11,6 @@ brightness: The brightness level of the display as a percentage (ex. 100 = 100%,
 ```
 GhostLab42Reboot reboot;
 reboot.begin();
-reboot.setDisplayBrightness(4, 10);
-reboot.write(4, "01234");
+reboot.setDisplayBrightness(1, 10);
+reboot.write(1, "0123");
 ```

@@ -1,6 +1,6 @@
 /*
  * Arduino library that serves as the driver for GhostLab42's Reboot
- * dual-display board set
+ * triple-display board set
  *
  * See README.md and LICENSE for more information
  */
@@ -10,8 +10,9 @@
 #include "GhostLab42Reboot.h"
 
 // Each I2C has a unique bus address
-#define IS31FL3730_DIGIT_4_I2C_ADDRESS 0x63 // 4 digit IS31FL3730 display
-#define IS31FL3730_DIGIT_6_I2C_ADDRESS 0x60 // 6 digit IS31FL3730 display
+#define IS31FL3730_DIGIT_4_I2C_ADDRESS  0x63  // 4 digit IS31FL3730 display
+#define IS31FL3730_DIGIT_4S_I2C_ADDRESS 0x61  // 4 digit IS31FL3730 display (smaller)
+#define IS31FL3730_DIGIT_6_I2C_ADDRESS  0x60  // 6 digit IS31FL3730 display
 
 // "Matrix 1 Data Register" index in the IS31FL3730
 // 8-bit value to define which segments are lit.
@@ -71,9 +72,10 @@ void GhostLab42Reboot::begin()
 {
     Wire.begin();
 
-    // Set the maximum display power for both displays
-    setDisplayPowerMax(4);
-    setDisplayPowerMax(6);
+    // Set the maximum display power for all of the displays
+    setDisplayPowerMax(1);
+    setDisplayPowerMax(2);
+    setDisplayPowerMax(3);
 }
 
 /******************************************************************************
@@ -84,17 +86,16 @@ void GhostLab42Reboot::begin()
  * Writes the characters to the selected display. The only characters allowed
  * are numbers 0-9 and letters A, b, C, d, E, and F
  */
-void GhostLab42Reboot::write(int digits, String value)
+void GhostLab42Reboot::write(int displayID, String value)
 {
-  // User can technically give us any digit, so we have to do a nice
-  // conversion with that data so that we can use it for proper iteration
-  if (digits != 4) digits = 6;
+  // Verify the display exists before attempting to write to it
+  if (verifyDisplayID(displayID) == false) return;
 
   // Reset the display before writing
-  resetDisplay(digits);
+  resetDisplay(displayID);
 
   // Write the display data in the temporary registers
-  setupWireTransmission(digits);
+  setupWireTransmission(displayID);
   Wire.write(IS31FL3730_Data_Registers);
 
   // Character array that stores the substring that is to be written
@@ -142,7 +143,7 @@ void GhostLab42Reboot::write(int digits, String value)
   Wire.endTransmission();
 
   // Transfer the display data from the temporary registers to the display
-  setupWireTransmission(digits);
+  setupWireTransmission(displayID);
 
   // Write to the Update Column Register to let the board know we want to
   // update the display
@@ -159,12 +160,14 @@ void GhostLab42Reboot::write(int digits, String value)
  * Resets the display and sets the current to the maximum (5mA per segment)
  *
  * Parameters:
- * digits Selects the display to set the current, 4 = 4 digit display and all
- *        others = 6 digit display
+ * displayID Unique identifier for the display
  */
-void GhostLab42Reboot::resetDisplay(int digits)
+void GhostLab42Reboot::resetDisplay(int displayID)
 {
-  setupWireTransmission(digits);
+  // Verify the display exists before attempting to reset it
+  if (verifyDisplayID(displayID) == false) return;
+
+  setupWireTransmission(displayID);
 
   // Reset the lighting effects (dim, bright, etc.)
   // Send any value to reset the lighting (value ignored)
@@ -173,21 +176,24 @@ void GhostLab42Reboot::resetDisplay(int digits)
   Wire.endTransmission();
 
   // Reset the current
-  setDisplayPowerMax(digits);
+  setDisplayPowerMax(displayID);
 }
 
 /**
  * Dims the display
  *
  * Parameters:
- * digits     Selects the display to set the current, 4 = 4 digit display and all
- *            others = 6 digit display
+ * displayID  Unique identifier for the display
  * brightness The dimming level percentage as an int 0 - 100.
  */
-void GhostLab42Reboot::setDisplayBrightness (int digits, int brightness)
+void GhostLab42Reboot::setDisplayBrightness (int displayID, int brightness)
 {
+  // Verify the display exists before attempting to set its brightness
+  if (verifyDisplayID(displayID) == false) return;
+
   // Begin dimming the display
-  setupWireTransmission(digits);
+  setupWireTransmission(displayID);
+
   // Tell the lighting effect register to display at the desired
   // brightness level with values from the light correction lookup table
   Wire.write(IS31FL3730_PWM_Register);
@@ -200,15 +206,27 @@ void GhostLab42Reboot::setDisplayBrightness (int digits, int brightness)
  ******************************************************************************/
 
 /*
+ * Makes sure the user passes the library a valid display ID
+ *
+ * Parameters:
+ * displayID Unique identifier for the display
+ */
+bool GhostLab42Reboot::verifyDisplayID(int displayID)
+{
+    // User can technically give us any ID
+    // If they give us a bad ID, return false
+    return (displayID != 1 || displayID != 2 || displayID != 3);
+}
+
+/*
  * Sets the current to the minimum (5mA per segment)
  *
  * Parameters:
- * digits Selects the display to set the current, 4 = 4 digit display and all
- *        others = 6 digit display
+ * displayID Unique identifier for the display
  */
-void GhostLab42Reboot::setDisplayPowerMin(int digits)
+void GhostLab42Reboot::setDisplayPowerMin(int displayID)
 {
-  setupWireTransmission(digits);
+  setupWireTransmission(displayID);
 
   Wire.write(IS31FL3730_Lighting_Effect_Register);
   Wire.write(0x08); // Lowest level, 10mA
@@ -219,10 +237,9 @@ void GhostLab42Reboot::setDisplayPowerMin(int digits)
  * Sets the current to the maximum allowed for these displays (0mA per segment)
  *
  * Parameters:
- * digits Selects the display to set the current, 4 = 4 digit display and all
- *        others = 6 digit display
+ * displayID Unique identifier for the display
  */
-void GhostLab42Reboot::setDisplayPowerMax(int digits)
+void GhostLab42Reboot::setDisplayPowerMax(int displayID)
 {
   // The display driver does allow currents greater than the displays should
   // take - do not allow anything over 20mA!
@@ -230,8 +247,7 @@ void GhostLab42Reboot::setDisplayPowerMax(int digits)
   // we need to make sure that is never violated but the part is write-only, so
   // we need to keep track of the setting somewhere or just always force to the
   // max current.
-
-  setupWireTransmission(digits);
+  setupWireTransmission(displayID);
 
   Wire.write(IS31FL3730_Lighting_Effect_Register);
   Wire.write(0x0B); // Highest level, 20mA
@@ -242,17 +258,21 @@ void GhostLab42Reboot::setDisplayPowerMax(int digits)
  * Set up the Wire transmission depending on the display being used
  *
  * Parameters:
- * digits Selects the display to set the current, 4 = 4 digit display and all
- *        others = 6 digit display
+ * displayID Unique identifier for the display
  */
-void GhostLab42Reboot::setupWireTransmission(int digits)
+void GhostLab42Reboot::setupWireTransmission(int displayID)
 {
-  if (digits == 4)
+  if (displayID == 1)
   {
     // Use the four digit display
     Wire.beginTransmission(IS31FL3730_DIGIT_4_I2C_ADDRESS);
   }
-  else
+  else if (displayID == 2)
+  {
+      // Use the smaller four digit display
+      Wire.beginTransmission(IS31FL3730_DIGIT_4S_I2C_ADDRESS);
+  }
+  else if (displayID == 3)
   {
     // Use the six digit display
     Wire.beginTransmission(IS31FL3730_DIGIT_6_I2C_ADDRESS);

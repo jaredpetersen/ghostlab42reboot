@@ -5,14 +5,14 @@ GhostLab42Reboot reboot;
 
 void setup()
 {
-  delay(500);
   reboot.begin();
-  reboot.write(4, "-42.9");
+  reboot.write(1, "-42.9");
+  reboot.write(2, "126.2");
 }
 
 void loop()
 {
-  // String to be scrolled across the display
+  // String to be scrolled across the six digit display
   // Need the extra spaces to make the scrolling smooth
   String displayText = "      Who ya gonna call?     Ghostbusters!";
 
@@ -27,11 +27,11 @@ void loop()
   // Commence scrolling
   for (int i = 0; i < displayText.length(); i++)
   {
-    reboot.write(6, displayText.substring(i, i+6));
+    reboot.write(3, displayText.substring(i, i+6));
     delay(250);
   }
 
   // Clear and start over
-  reboot.resetDisplay(6);
+  reboot.resetDisplay(3);
   delay(400);
 }

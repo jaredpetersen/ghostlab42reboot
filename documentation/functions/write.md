@@ -1,4 +1,4 @@
-# write(int digits, String value)
+# write(int displayID, String value)
 ### Description
 Writes characters to the display. Supports integers, decimals, letters, and some punctuation (periods, question marks, exclamation points, and hyphens). Please note that decimals/periods will be wrapped into the previous character's digit display unless extra "spaces" are inserted or if the decimal/period is the first character in the input string (in which case there is technically a "space" added in front of it).
 
@@ -9,13 +9,13 @@ If the number of characters being written are fewer than the display length, the
 If the library does not recognize a character that you are trying to write, the space that the character would normally occupy will not be lit up. For example, writing a string like "8$3#57" to the six-segment display will result in "8 3 57" being displayed.
 
 ### Parameters
-digits: The display to write to. Input 4 for the four-segment display or 6 for the six-segment display.
+displayID: Unique identifier for the display that is to be written to. Input 1 for the four-digit display, 2 for the smaller four-digit display, or 3 for the six-digit display.
 
-value: Character array with the integer that you would like to display.
+value: String with the value that you would like to display.
 
 ### Example
 ```
 GhostLab42Reboot reboot;
 reboot.begin();
-reboot.write(4, "0123");
+reboot.write(1, "0123");
 ```

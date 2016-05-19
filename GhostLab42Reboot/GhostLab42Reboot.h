@@ -16,13 +16,14 @@ class GhostLab42Reboot
   public:
     GhostLab42Reboot();
     void begin();
-    void write(int digits, String value);
-    void resetDisplay(int digits);
-    void setDisplayBrightness (int digits, int brightness);
+    void write(int displayID, String value);
+    void resetDisplay(int displayID);
+    void setDisplayBrightness (int displayID, int brightness);
   private:
-    void setDisplayPowerMin(int digits);
-    void setDisplayPowerMax(int digits);
-    void setupWireTransmission(int digits);
+    bool verifyDisplayID(int displayID);
+    void setDisplayPowerMin(int displayID);
+    void setDisplayPowerMax(int displayID);
+    void setupWireTransmission(int displayID);
     void writeCharacter(char displayCharacters[]);
 };
 

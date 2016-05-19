@@ -1,14 +1,14 @@
-# resetDisplay(int digits)
+# resetDisplay(int displayID)
 ### Description
 Clears the display and resets the brightness level to 100%.
 
 ### Parameters
-digits: The display to write to. Input 4 for the four-segment display or 6 for the six-segment display.
+displayID: Unique identifier for the display that is to be reset. Input 1 for the four-digit display, 2 for the smaller four-digit display, or 3 for the six-digit display.
 
 ### Example
 ```
 GhostLab42Reboot reboot;
 reboot.begin();
-reboot.write(4, "01234");
-reboot.resetDisplay(4);
+reboot.write(1, "0123");
+reboot.resetDisplay(1);
 ```

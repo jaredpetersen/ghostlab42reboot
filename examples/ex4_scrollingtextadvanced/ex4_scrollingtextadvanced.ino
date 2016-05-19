@@ -6,12 +6,13 @@ GhostLab42Reboot reboot;
 void setup()
 {
   reboot.begin();
-  reboot.write(4, "-46.9");
+  reboot.write(1, "-46.9");
+  reboot.write(2, "126.2");
 }
 
 void loop()
 {
-  // String to be scrolled across the display
+  // String to be scrolled across the six digit display
   // Need the extra spaces to make the scrolling smooth
   String displayText = "       . Test 1.2.3.4.  ...";
 
@@ -49,12 +50,12 @@ void loop()
     if (displayText.charAt(i) == '.' && displayText.charAt(i-1) != '.')
     {
       // Write the string to the display with the extra offset
-      reboot.write(6, displayText.substring(i+1, i+offset+1));
+      reboot.write(3, displayText.substring(i+1, i+offset+1));
     }
     else
     {
       // Write the string to the display with the normal offset
-      reboot.write(6, displayText.substring(i, i+offset));
+      reboot.write(3, displayText.substring(i, i+offset));
 
       // Essentially the refresh rate of the display
       // No need to use the delay in the previous case
@@ -64,6 +65,6 @@ void loop()
   }
 
   // Clear the display and start over
-  reboot.resetDisplay(6);
+  reboot.resetDisplay(3);
   delay(400);
 }
