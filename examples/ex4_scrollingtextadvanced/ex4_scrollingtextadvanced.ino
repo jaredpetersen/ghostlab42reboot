@@ -14,7 +14,7 @@ void loop()
 {
   // String to be scrolled across the six digit display
   // Need the extra spaces to make the scrolling smooth
-  String displayText = "       . Test 1.2.3.4.  ...";
+  String displayText = "       . Test 1.2.3.4.  ...      ";
 
   // A NOTE ABOUT SCROLLING:
   // This more complicated method of scrolling handles periods/decimals, which are
@@ -47,15 +47,15 @@ void loop()
     // was cut off during the scrolling
     // Just let the period/decimal disappear since we do not want it to
     // scroll off the display like a regular character.
-    if (displayText.charAt(i) == '.' && displayText.charAt(i-1) != '.')
+    if (displayText.charAt(i) == '.' && displayText.charAt(i - 1) != '.')
     {
       // Write the string to the display with the extra offset
-      reboot.write(0, displayText.substring(i+1, i+offset+1));
+      reboot.write(0, displayText.substring(i + 1, i + offset + 1));
     }
     else
     {
       // Write the string to the display with the normal offset
-      reboot.write(0, displayText.substring(i, i+offset));
+      reboot.write(0, displayText.substring(i, i + offset));
 
       // Essentially the refresh rate of the display
       // No need to use the delay in the previous case
@@ -65,6 +65,5 @@ void loop()
   }
 
   // Clear the display and start over
-  reboot.resetDisplay(3);
-  delay(400);
+  reboot.resetDisplay(0);
 }

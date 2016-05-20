@@ -91,12 +91,7 @@ void GhostLab42Reboot::write(int displayID, String value)
   // Verify the display exists before attempting to write to it
   if (verifyDisplayID(displayID) == false) return;
 
-  // Clear the display before writing
-  resetDisplay(displayID);
-
   // Make sure the maximum current for the display is not exceeded
-  // This is already done in resetDisplay, but it is extremely critical that
-  // the current does not exceed the maximum
   setDisplayPowerMax(displayID);
 
   // Write the display data in the temporary registers

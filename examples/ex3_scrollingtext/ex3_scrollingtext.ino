@@ -14,7 +14,7 @@ void loop()
 {
   // String to be scrolled across the six digit display
   // Need the extra spaces to make the scrolling smooth
-  String displayText = "      Who ya gonna call?     Ghostbusters!";
+  String displayText = "      Who ya gonna call?     Ghostbusters!      ";
 
   // A NOTE ABOUT SCROLLING:
   // This works fine if there are not any periods/decimals, since a period/decimal
@@ -27,11 +27,10 @@ void loop()
   // Commence scrolling
   for (int i = 0; i < displayText.length(); i++)
   {
-    reboot.write(0, displayText.substring(i, i+6));
+    reboot.write(0, displayText.substring(i, i + 6));
     delay(250);
   }
 
   // Clear and start over
   reboot.resetDisplay(0);
-  delay(400);
 }
