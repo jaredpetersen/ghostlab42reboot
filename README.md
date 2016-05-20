@@ -9,6 +9,7 @@ The GhostLab42 Reboot Triple-Display Board Set, designed by Doug Keithley, is cu
 * [ex2_brightness](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/examples/ex2_brightness/ex2_brightness.ino): Fluctuate the display brightness
 * [ex3_scrollingtext](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/examples/ex3_scrollingtext/ex3_scrollingtext.ino): Scroll text across the screen
 * [ex4_scrollingtextadvanced](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/examples/ex4_scrollingtextadvanced/ex4_scrollingtextadvanced.ino): Scroll text across the screen (supports decimals/periods)
+* [ex5_counting](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/examples/ex5_counting/ex5_counting.ino): Count up and down at different speeds
 
 # Functions
 * [begin()](https://github.com/jaredpetersen/ghostlab42reboot/blob/master/documentation/functions/begin.md)
