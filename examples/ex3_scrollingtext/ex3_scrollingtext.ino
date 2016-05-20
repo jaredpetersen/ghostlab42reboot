@@ -6,8 +6,8 @@ GhostLab42Reboot reboot;
 void setup()
 {
   reboot.begin();
-  reboot.write(1, "-42.9");
-  reboot.write(2, "126.2");
+  reboot.write(1, "126.2");
+  reboot.write(2, "-42.9");
 }
 
 void loop()
@@ -27,11 +27,11 @@ void loop()
   // Commence scrolling
   for (int i = 0; i < displayText.length(); i++)
   {
-    reboot.write(3, displayText.substring(i, i+6));
+    reboot.write(0, displayText.substring(i, i+6));
     delay(250);
   }
 
   // Clear and start over
-  reboot.resetDisplay(3);
+  reboot.resetDisplay(0);
   delay(400);
 }

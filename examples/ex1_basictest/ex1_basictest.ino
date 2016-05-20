@@ -14,13 +14,14 @@ void loop()
   reboot.setDisplayBrightness(3, 2);
   
   // Write specific numbers to all the displays in a flashing pattern
-  reboot.write(1, "5678");
-  reboot.write(2, "1923");
-  reboot.write(3, "9146431");
+  reboot.write(0, "9146431");
+  reboot.write(1, "1923");
+  reboot.write(2, "5678");
   delay(200);
 
-  reboot.write(1, "4251");
-  reboot.write(2, "8210");
-  reboot.write(3, "1709752");
+  reboot.write(0, "1709752");
+  reboot.write(1, "8210");
+  reboot.write(2, "4251");
+  
   delay(200);
 }

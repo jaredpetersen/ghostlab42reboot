@@ -3,7 +3,7 @@
 Clears the display.
 
 ### Parameters
-displayID: Unique identifier for the display that is to be reset. Input 1 for the four-digit display, 2 for the smaller four-digit display, or 3 for the six-digit display.
+displayID: Unique identifier for the display that is to be reset. Input 0 for the six-digit display, 1 for the smaller four-digit display, or 2 for the four-digit display.
 
 ### Example
 ```

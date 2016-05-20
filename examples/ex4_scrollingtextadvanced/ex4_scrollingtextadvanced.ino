@@ -6,8 +6,8 @@ GhostLab42Reboot reboot;
 void setup()
 {
   reboot.begin();
-  reboot.write(1, "-46.9");
-  reboot.write(2, "126.2");
+  reboot.write(1, "126.2");
+  reboot.write(2, "-46.9");
 }
 
 void loop()
@@ -50,12 +50,12 @@ void loop()
     if (displayText.charAt(i) == '.' && displayText.charAt(i-1) != '.')
     {
       // Write the string to the display with the extra offset
-      reboot.write(3, displayText.substring(i+1, i+offset+1));
+      reboot.write(0, displayText.substring(i+1, i+offset+1));
     }
     else
     {
       // Write the string to the display with the normal offset
-      reboot.write(3, displayText.substring(i, i+offset));
+      reboot.write(0, displayText.substring(i, i+offset));
 
       // Essentially the refresh rate of the display
       // No need to use the delay in the previous case

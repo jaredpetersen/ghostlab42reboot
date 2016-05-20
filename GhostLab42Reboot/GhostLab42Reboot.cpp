@@ -73,9 +73,9 @@ void GhostLab42Reboot::begin()
     Wire.begin();
 
     // Set the maximum display power for all of the displays
+    setDisplayPowerMax(0);
     setDisplayPowerMax(1);
     setDisplayPowerMax(2);
-    setDisplayPowerMax(3);
 }
 
 /******************************************************************************
@@ -229,9 +229,9 @@ void GhostLab42Reboot::setDisplayBrightness (int displayID, int brightness)
  */
 bool GhostLab42Reboot::verifyDisplayID(int displayID)
 {
-    // User can technically give us any ID
-    // If they give us a bad ID, return false
-    return (displayID != 1 || displayID != 2 || displayID != 3);
+  // User can technically give us any ID
+  // If they give us a bad ID, return false
+  return (displayID != 0 || displayID != 1 || displayID != 2);
 }
 
 /*
@@ -281,20 +281,20 @@ void GhostLab42Reboot::setDisplayPowerMax(int displayID)
  */
 void GhostLab42Reboot::setupWireTransmission(int displayID)
 {
-  if (displayID == 1)
-  {
-    // Use the four digit display
-    Wire.beginTransmission(IS31FL3730_DIGIT_4_I2C_ADDRESS);
-  }
-  else if (displayID == 2)
-  {
-      // Use the smaller four digit display
-      Wire.beginTransmission(IS31FL3730_DIGIT_4S_I2C_ADDRESS);
-  }
-  else if (displayID == 3)
+  if (displayID == 0)
   {
     // Use the six digit display
     Wire.beginTransmission(IS31FL3730_DIGIT_6_I2C_ADDRESS);
+  }
+  else if (displayID == 1)
+  {
+    // Use the smaller four digit display
+    Wire.beginTransmission(IS31FL3730_DIGIT_4S_I2C_ADDRESS);
+  }
+  else if (displayID == 2)
+  {
+    // Use the four digit display
+    Wire.beginTransmission(IS31FL3730_DIGIT_4_I2C_ADDRESS);
   }
 }
 
