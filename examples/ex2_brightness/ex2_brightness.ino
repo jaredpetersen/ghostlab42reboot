@@ -23,13 +23,24 @@ void loop()
   // Loop over the 100 different display brightness settings
   for (int i = 0; i <= 100; i++)
   {
-    // Set the new display brightness
+    // Set the display brightness
     reboot.setDisplayBrightness(0, i);
-    reboot.setDisplayBrightness(1, i);
+    reboot.setDisplayBrightness(1, i/2);
+    reboot.setDisplayBrightness(2, 100-i);
+    
+    // Wait for 20ms then use the next brightness setting
+    delay(20);
+  }
+
+  // Loop over the 100 different display brightness settings
+  for (int i = 0; i <= 100; i++)
+  {
+    // Set the display brightness
+    reboot.setDisplayBrightness(0, 100 - i);
+    reboot.setDisplayBrightness(1, 50 + i/2);
     reboot.setDisplayBrightness(2, i);
     
-    // Wait for 20ms and then use the next brightness setting
+    // Wait for 20ms then use the next brightness setting
     delay(20);
   }
 }
-
